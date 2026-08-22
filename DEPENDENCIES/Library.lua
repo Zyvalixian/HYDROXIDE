@@ -1036,6 +1036,25 @@ function IsValidCustomIcon(Icon: string)
     return typeof(Icon) == "string" and (Icon:match("rbxasset") or Icon:match("roblox%.com/asset/%?id=") or Icon:match("rbxthumb://type="))
 end
 
+-- The upstream icon manifest was regenerated without changing its version.
+-- Volt can therefore keep an old spritesheet while resolving offsets from the
+-- new manifest. Mark that known stale cache for a one-time refresh.
+pcall(function()
+    local iconFolder = "lucide-icons"
+    local versionPath = iconFolder .. "/version.txt"
+    local sheetOnePath = iconFolder .. "/1.png"
+    local sheetTwoPath = iconFolder .. "/2.png"
+
+    if isfile and readfile and writefile
+        and isfile(versionPath)
+        and isfile(sheetOnePath)
+        and isfile(sheetTwoPath)
+        and #readfile(sheetOnePath) == 484530
+        and #readfile(sheetTwoPath) == 53088 then
+        writefile(versionPath, "hxd-refresh-stale-lucide-atlas")
+    end
+end)
+
 local FetchIcons, Icons = pcall(function()
     return loadstring(
         game:HttpGet("https://upio-github-mirror.pages.dev/source.lua")

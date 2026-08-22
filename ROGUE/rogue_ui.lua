@@ -964,6 +964,10 @@ end
 
 function GachaBot:serverhop(token, reason, campers)
     if not self:isCurrent(token) or self.action == "HOPPING" then return end
+    if self.player.Character and os.clock() - self.spawnedAt < 3 then
+        task.wait(3 - (os.clock() - self.spawnedAt))
+        if not self:isCurrent(token) then return end
+    end
     self.action = "HOPPING"
     self:setState("HOPPING", reason)
     self:saveRuntime()
@@ -1392,15 +1396,20 @@ end
 function GachaBot:handleSpawned(token, npc, head, click)
     local character = self.player.Character
     if not character then return end
-    if not self:isSafeServerMode() and not self:hasForceField(character) then
-        return self:menuUntilSuccess(token, true)
-    end
     if self.spawnCharacter ~= character then
         self.spawnCharacter = character
         self.spawnedAt = os.clock()
         self.tooFarSince = nil
         self.lastSafetyAt = os.clock()
         self:refreshChairChoices()
+    end
+    if os.clock() - self.spawnedAt < 3 then
+        self.tooFarSince = nil
+        self:setState("SPAWNING", "waiting for ForceField")
+        return
+    end
+    if not self:isSafeServerMode() and not self:hasForceField(character) then
+        return self:menuUntilSuccess(token, true)
     end
 
     if self:isProximityCheckEnabled() then
@@ -1477,7 +1486,14 @@ end
 function GachaBot:run(token)
     while self:isCurrent(token) do
         if self.terminalMenu then
-            if self.player.Character then self:menuUntilSuccess(token, false) end
+            if self.player.Character then
+                if os.clock() - self.spawnedAt < 3 then
+                    self:setState("SPAWNING", "waiting before menu")
+                    task.wait(0.1)
+                    continue
+                end
+                self:menuUntilSuccess(token, false)
+            end
             task.wait(0.5)
             continue
         end
@@ -1499,7 +1515,12 @@ function GachaBot:forceFieldWatchdog(token)
     while self:isCurrent(token) do
         if not self:isSafeServerMode() then
             local character = self.player.Character
+            if character and self.spawnCharacter ~= character then
+                self.spawnCharacter = character
+                self.spawnedAt = os.clock()
+            end
             if character
+                and os.clock() - self.spawnedAt >= 3
                 and self.action ~= "GACHA"
                 and self.action ~= "TARGET_COMPLETE"
                 and not self:hasStartMenu()
@@ -1819,7 +1840,12 @@ function GachaBot:BuildUI(tab)
 
     self:bindPersistence()
 
-    local function refreshChairsAfterReplication()
+    local function refreshChairsAfterReplication(character)
+        character = character or self.player.Character
+        if character and self.spawnCharacter ~= character then
+            self.spawnCharacter = character
+            self.spawnedAt = os.clock()
+        end
         task.spawn(function()
             for _, delay in ipairs({0.25, 0.75, 1.5, 3}) do
                 task.wait(delay)
@@ -1828,7 +1854,7 @@ function GachaBot:BuildUI(tab)
         end)
     end
     self.connections[#self.connections + 1] = self.player.CharacterAdded:Connect(refreshChairsAfterReplication)
-    refreshChairsAfterReplication()
+    refreshChairsAfterReplication(self.player.Character)
 
     task.delay(4, function()
         if self.mem:HasItem("gachabot_started") and self.mem:GetItem("gachabot_started") == "true" then
