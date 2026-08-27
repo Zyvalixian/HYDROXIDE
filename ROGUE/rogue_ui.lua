@@ -3126,6 +3126,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
             player_esp = true,
             player_box = true,
             player_health = true,
+            player_username = true,
             player_name = true,
             player_tags = true,
             player_intent = true,
@@ -7314,6 +7315,9 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                                     end
 
                                     do
+                                        local show_username = Toggles and Toggles.PlayerUsername and Toggles.PlayerUsername.Value
+                                        local show_name = Toggles and Toggles.PlayerName and Toggles.PlayerName.Value
+                                        local show_any_name = show_username or show_name
                                         local observe_text = ""
                                         local has_observe = false
 
@@ -7321,7 +7325,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                                         local should_update_text = (now - esp.last_text_update) >= esp.text_update_interval
 
                                         if should_update_text then
-                                            if Toggles and Toggles.PlayerName and Toggles.PlayerName.Value and Toggles and Toggles.PlayerObserve and Toggles.PlayerObserve.Value and show_details then
+                                            if show_any_name and Toggles and Toggles.PlayerObserve and Toggles.PlayerObserve.Value and show_details then
                                                 local backpack = FindFirstChild(esp.player, "Backpack")
 
                                                 if backpack then
@@ -7342,9 +7346,20 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                                         end
 
                                         do
-                                            if Toggles and Toggles.PlayerName and Toggles.PlayerName.Value then
+                                            if show_any_name then
                                                 if should_update_text then
-                                                    esp.cached_texts.name = "["..tostring(math.floor(distance)).."m] "..esp.player.Name.."\n"..cheat_client:get_name(esp.player)
+                                                    local name_lines = {}
+
+                                                    if show_username then
+                                                        name_lines[#name_lines + 1] = esp.player.Name
+                                                    end
+
+                                                    if show_name then
+                                                        name_lines[#name_lines + 1] = cheat_client:get_name(esp.player)
+                                                    end
+
+                                                    name_lines[1] = "["..tostring(math.floor(distance)).."m] "..name_lines[1]
+                                                    esp.cached_texts.name = table.concat(name_lines, "\n")
                                                     esp.last_text_update = now
                                                 end
 
@@ -9937,7 +9952,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                         if not (Toggles and Toggles.day_farm and Toggles.day_farm.Value) then return end
                         if no_kick() then return end
 
-                        if descendant:IsA("Tool") and (descendant.Name == "Perflora" or descendant.Name == "Pebble" or descendant.Name == "Armis" or descendant.Name == "Celeritas" or descendant.Name == "Dagger Throw" or descendant.Name == "Vulnere" or descendant.Name == "Justice Spears" or descendant.Name == "Spindulys") then
+                        if descendant:IsA("Tool") and (descendant.Name == "Perflora" or descendant.Name == "Pebble" or descendant.Name == "Armis" or descendant.Name == "Celeritas" or descendant.Name == "Dagger Throw" or descendant.Name == "Vulnere" or descendant.Name == "Justice Spears" or descendant.Name == "Spindulys" or descendant.Name == "Opal Shard") then
                             local character = descendant.Parent
                             if character and character:IsA("Model") then
                                 local player = plrs:GetPlayerFromCharacter(character)
@@ -9952,7 +9967,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                         for _, other_player in next, plrs:GetPlayers() do
                             if other_player ~= plr and other_player.Character then
                                 for _, tool in next, other_player.Character:GetChildren() do
-                                    if tool:IsA("Tool") and (tool.Name == "Perflora" or tool.Name == "Pebble" or tool.Name == "Celeritas" or tool.Name == "Armis" or tool.Name == "Dagger Throw" or tool.Name == "Vulnere" or tool.Name == "Spindulys" or tool.Name == "Justice spears") then
+                                    if tool:IsA("Tool") and (tool.Name == "Perflora" or tool.Name == "Pebble" or tool.Name == "Celeritas" or tool.Name == "Armis" or tool.Name == "Dagger Throw" or tool.Name == "Vulnere" or tool.Name == "Spindulys" or tool.Name == "Justice spears" or tool.Name == "Opal Shard") then
                                         DayfarmServerhop(string.format("%s (%s) already has dangerous item: %s", other_player.Name, other_player.UserId, tool.Name))
                                         return
                                     end
@@ -10678,6 +10693,11 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                 Options.PlayerEspKeybind:OnChanged(function()
                     cheat_client.config.player_esp_keybind = Options.PlayerEspKeybind.Value
                 end)
+
+                group_player:AddToggle("PlayerUsername", {
+                    Text = "Username",
+                    Default = cheat_client.config.player_username
+                })
 
                 group_player:AddToggle("PlayerName", {
                     Text = "Name",
@@ -20960,9 +20980,9 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
             group_trinket_bot:AddDropdown("EmergencyServerhopConditions", {
                 Text = "Emergency Serverhop Conditions",
                 Tooltip = "Select items that trigger instant serverhop when equipped by another player (no emergency gate)",
-                Values = {"Perflora", "Pebble", "Armis", "Dagger Throw", "Celeritas", "Vulnere", "Spindulys", "Justice Spears"},
+                Values = {"Perflora", "Pebble", "Armis", "Dagger Throw", "Celeritas", "Vulnere", "Spindulys", "Justice Spears", "Opal Shard"},
                 Multi = true,
-                Default = {"Perflora", "Pebble", "Armis", "Dagger Throw", "Celeritas", "Vulnere", "Spindulys", "Justice Spears"},
+                Default = {"Perflora", "Pebble", "Armis", "Dagger Throw", "Celeritas", "Vulnere", "Spindulys", "Justice Spears", "Opal Shard"},
                 Compact = true
             })
 
