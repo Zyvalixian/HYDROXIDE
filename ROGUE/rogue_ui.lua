@@ -1016,17 +1016,14 @@ function GachaBot:spawnFromMenu(token, head)
     local cleanSince = nil
     local nextPlayAttempt = 0
     while self:isCurrent(token) and (not self.player.Character or self:hasStartMenu()) do
-        if self:isProximityCheckEnabled() then
+        if self:getToggle("GachaHopIfMod", true) then
             local moderator = self:scanModerator()
             if moderator then
-                if self:getToggle("GachaHopIfMod", true) then
-                    return self:serverhop(token, "Moderator detected: " .. moderator.Name)
-                end
-                cleanSince = nil
-                task.wait(0.25)
-                continue
+                return self:serverhop(token, "Moderator detected: " .. moderator.Name)
             end
+        end
 
+        if self:isProximityCheckEnabled() then
             local campers = self:scanCampers(head)
             self:updateCamperClock(campers)
             if #campers > 0 then
@@ -1420,25 +1417,19 @@ function GachaBot:handleSpawned(token, npc, head, click)
         return self:menuUntilSuccess(token, true)
     end
 
-    if self:isProximityCheckEnabled() then
-        local moderator = self:scanModerator()
-        if moderator then
+    local moderator = self:getToggle("GachaHopIfMod", true) and self:scanModerator() or nil
+    if moderator then
+        if not self.pendingMenuAt then self.pendingMenuAt = os.clock() + math.random(1, 4) end
+        self.pendingHopReason = "Moderator detected: " .. moderator.Name
+    elseif self:isProximityCheckEnabled() then
+        local campers = self:scanCampers(head)
+        self:updateCamperClock(campers)
+        if #campers > 0 then
             if not self.pendingMenuAt then self.pendingMenuAt = os.clock() + math.random(1, 4) end
-            if self:getToggle("GachaHopIfMod", true) then
-                self.pendingHopReason = "Moderator detected: " .. moderator.Name
-            else
-                self.pendingHopReason = nil
-            end
-        else
-            local campers = self:scanCampers(head)
-            self:updateCamperClock(campers)
-            if #campers > 0 then
-                if not self.pendingMenuAt then self.pendingMenuAt = os.clock() + math.random(1, 4) end
-                local minutes = math.max(0.1, tonumber(self:getOption("GachaCamperMinutes", "3")) or 3)
-                if self:getToggle("GachaHopIfCamped", true) and self.camperElapsed >= minutes * 60 then
-                    self:notify("Camper detected - hopping server")
-                    return self:serverhop(token, "Camper detected", campers)
-                end
+            local minutes = math.max(0.1, tonumber(self:getOption("GachaCamperMinutes", "3")) or 3)
+            if self:getToggle("GachaHopIfCamped", true) and self.camperElapsed >= minutes * 60 then
+                self:notify("Camper detected - hopping server")
+                return self:serverhop(token, "Camper detected", campers)
             end
         end
     else
@@ -1728,7 +1719,7 @@ function GachaBot:BuildUI(tab)
     main:AddToggle("GachaProximityCheck", {
         Text = "Proximity Check",
         Default = self:sessionValue("proximity_check", true),
-        Tooltip = "When disabled, ignores players and moderators but still maintains ForceField safety and automates gacha.",
+        Tooltip = "When disabled, ignores players but still maintains ForceField safety and automates gacha.",
     })
     main:AddSlider("GachaProximity", {
         Text = "Player Detection Range",
@@ -1752,7 +1743,6 @@ function GachaBot:BuildUI(tab)
     main:AddToggle("GachaHopIfMod", {
         Text = "Hop if Mod Joins",
         Default = self:sessionValue("hop_if_mod", true),
-        Tooltip = "If disabled, stays in menu until the moderator leaves.",
     })
     main:AddToggle("GachaKickLowSilver", {
         Text = "Kick if Low Silver",
