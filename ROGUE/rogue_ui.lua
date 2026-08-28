@@ -453,9 +453,16 @@ function GachaBot:getCharacterRoot(target)
     return character and character:FindFirstChild("HumanoidRootPart") or nil
 end
 
-function GachaBot:findXenyari()
+function GachaBot:getGachaNpcName()
+    if game.PlaceId == 3541987450 or game.PlaceId == 14341521240 then
+        return "Sayana"
+    end
+    return "Xenyari"
+end
+
+function GachaBot:findGachaNpc()
     local npcs = workspace:FindFirstChild("NPCs")
-    local npc = npcs and npcs:FindFirstChild("Xenyari")
+    local npc = npcs and npcs:FindFirstChild(self:getGachaNpcName())
     if not npc then return nil end
     local head = npc:FindFirstChild("Head") or npc:FindFirstChild("HumanoidRootPart") or npc.PrimaryPart
     local click = npc:FindFirstChildWhichIsA("ClickDetector", true)
@@ -463,10 +470,10 @@ function GachaBot:findXenyari()
     return npc, head, click
 end
 
-function GachaBot:waitForXenyari(token, seconds)
+function GachaBot:waitForGachaNpc(token, seconds)
     local deadline = os.clock() + (seconds or 5)
     repeat
-        local npc, head, click = self:findXenyari()
+        local npc, head, click = self:findGachaNpc()
         if npc then return npc, head, click end
         task.wait(0.15)
     until os.clock() >= deadline or not self:isCurrent(token)
@@ -1250,10 +1257,11 @@ function GachaBot:performGacha(token, npc, clickDetector)
     end) or nil
     local result = nil
     local activeRemote = nil
+    local gachaNpcName = lower(self:getGachaNpcName())
     local dialogueConnections = self:connectDialogue(function(remote, data)
         if result then return end
         local speaker = tableValueInsensitive(data, "speaker")
-        if speaker and not lower(speaker):find("xenyari", 1, true) then return end
+        if speaker and not lower(speaker):find(gachaNpcName, 1, true) then return end
         activeRemote = remote
         local classified = self:classifyDialogue(data)
         if classified then
@@ -1388,7 +1396,7 @@ function GachaBot:performGacha(token, npc, clickDetector)
         return self:serverhop(token, "Captcha solver failed")
     else
         self:menuUntilSuccess(token, false)
-        return self:serverhop(token, "Xenyari interaction timed out")
+        return self:serverhop(token, self:getGachaNpcName() .. " interaction timed out")
     end
     self.action = nil
 end
@@ -1444,12 +1452,13 @@ function GachaBot:handleSpawned(token, npc, head, click)
     elseif root and (root.Position - head.Position).Magnitude > 15 then
         self.tooFarSince = self.tooFarSince or os.clock()
         if os.clock() - self.tooFarSince >= 6 then
-            local message = string.format("@here %s Too far from Xenyari (maybe dead) - kicking", self.player.Name)
+            local npcName = self:getGachaNpcName()
+            local message = string.format("@here %s Too far from %s (maybe dead) - kicking", self.player.Name, npcName)
             self:sendWebhook("general", message, "Gacha bot safety kick", {
                 {name = "Distance", value = string.format("%.1f studs", (root.Position - head.Position).Magnitude), inline = true},
             }, 15158332)
             self:setState("TOO FAR", "kicking")
-            self.player:Kick("Too far from Xenyari (maybe dead)")
+            self.player:Kick("Too far from " .. npcName .. " (maybe dead)")
             return
         end
     else
@@ -1497,9 +1506,9 @@ function GachaBot:run(token)
             task.wait(0.5)
             continue
         end
-        local npc, head, click = self:waitForXenyari(token, 5)
+        local npc, head, click = self:waitForGachaNpc(token, 5)
         if not npc then
-            self:serverhop(token, "Xenyari missing")
+            self:serverhop(token, self:getGachaNpcName() .. " missing")
             continue
         end
         if not self.player.Character or self:hasStartMenu() then
@@ -1556,7 +1565,7 @@ function GachaBot:runGuarded(token)
 end
 
 function GachaBot:canStartExplicitly()
-    local _, head = self:findXenyari()
+    local _, head = self:findGachaNpc()
     local root = self:getCharacterRoot(self.player)
     return head and root and (root.Position - head.Position).Magnitude <= 15
 end
@@ -1564,7 +1573,7 @@ end
 function GachaBot:Start(resume)
     if self.running then return true end
     if not resume and not self:canStartExplicitly() then
-        self:notify("Stand within 15 studs of Xenyari before starting Gacha Bot", 6)
+        self:notify("Stand within 15 studs of " .. self:getGachaNpcName() .. " before starting Gacha Bot", 6)
         task.defer(function()
             local toggle = self.toggles and self.toggles.GachaBot
             if toggle and toggle.Value then toggle:SetValue(false) end
@@ -1705,7 +1714,7 @@ function GachaBot:BuildUI(tab)
     main:AddToggle("GachaBot", {
         Text = "Gacha Bot",
         Default = false,
-        Tooltip = "Start near Xenyari. Resumes automatically after serverhops.",
+        Tooltip = "Start near " .. self:getGachaNpcName() .. ". Resumes automatically after serverhops.",
         Callback = function(value)
             if value then
                 local resume = self.resumeRequested
@@ -1748,7 +1757,7 @@ function GachaBot:BuildUI(tab)
     main:AddToggle("GachaKickLowSilver", {
         Text = "Kick if Low Silver",
         Default = self:sessionValue("kick_low_silver", true),
-        Tooltip = "If disabled, stays in menu forever after Xenyari reports insufficient funds.",
+        Tooltip = "If disabled, stays in menu forever after " .. self:getGachaNpcName() .. " reports insufficient funds.",
     })
     main:AddToggle("GachaSafeServer", {
         Text = "Safe Server Mode",
