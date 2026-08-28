@@ -3591,6 +3591,54 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
         window_active = true,
     }
 
+    do
+        local hardcoded_count = #cheat_client.mod_list
+        local known_moderators = {}
+        for _, user_id in ipairs(cheat_client.mod_list) do
+            known_moderators[user_id] = true
+        end
+
+        local success, result = pcall(function()
+            local path = "data/moderators.json"
+            local source
+            if hxd_env.HXD_LOAD_MODE == "local" and hxd_has_local(path) and readfile then
+                source = readfile(hxd_local_path(path))
+            else
+                source = game:HttpGet((hxd_env.HXD_REMOTE_ROOT or HXD_DEFAULT_REMOTE_ROOT) .. path, true)
+            end
+
+            local snapshot = Services.HttpService:JSONDecode(source)
+            assert(type(snapshot) == "table" and type(snapshot.moderators) == "table", "invalid moderator snapshot")
+
+            local added = 0
+            for _, value in ipairs(snapshot.moderators) do
+                local user_id = tonumber(value)
+                if user_id and user_id > 0 and not known_moderators[user_id] then
+                    known_moderators[user_id] = true
+                    table.insert(cheat_client.mod_list, user_id)
+                    added = added + 1
+                end
+            end
+
+            return {
+                added = added,
+                version = snapshot.source_version,
+            }
+        end)
+
+        if success then
+            print(string.format(
+                "[Moderators] Loaded %d Stella IDs (%d hardcoded, %d total), version %s",
+                result.added,
+                hardcoded_count,
+                #cheat_client.mod_list,
+                tostring(result.version or "unknown")
+            ))
+        else
+            warn("[Moderators] Stella snapshot unavailable; using hardcoded list only:", result)
+        end
+    end
+
     local friends_file = "HYDROXIDE/friends.json"
     function cheat_client:save_friends()
         local success, err = pcall(function()
