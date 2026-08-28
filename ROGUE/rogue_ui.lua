@@ -1245,14 +1245,15 @@ function GachaBot:performGacha(token, npc, clickDetector)
     self:setState("GACHA")
     local before = self:snapshotRolls()
     local observedRoll = nil
+    local result = nil
     local backpack = self.player:FindFirstChildOfClass("Backpack")
     local childConnection = backpack and backpack.ChildAdded:Connect(function(item)
         if isRollName(item.Name) then
             observedRoll = item.Name
+            result = result or "SUCCESS"
             self.postGachaHoldUntil = math.max(self.postGachaHoldUntil or 0, os.clock() + 2)
         end
     end) or nil
-    local result = nil
     local activeRemote = nil
     local gachaNpcName = lower(self:getGachaNpcName())
     local dialogueConnections = self:connectDialogue(function(remote, data)
