@@ -14,3 +14,11 @@
 !DEPENDENCIES/Captcha.lua
 !hello_stella.lua
 !local_loader.lua
+!.github/
+!.github/workflows/
+!.github/workflows/sync-moderators.yml
+!scripts/
+!scripts/sync_moderators.py
+!data/
+!data/moderators.json
+!data/moderator_changes.json
