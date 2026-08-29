@@ -1,7 +1,7 @@
 local hxd_env = getgenv()
 hxd_env.HXD_LOAD_MODE = "local"
 hxd_env.HXD_LOCAL_ROOT = "HYDROXIDE_REPO/"
-hxd_env.HXD_REMOTE_ROOT = "https://raw.githubusercontent.com/Salenware/HYDROXIDE/refs/heads/main/"
+hxd_env.HXD_REMOTE_ROOT = "https://raw.githubusercontent.com/Viatanyl/HYDROXIDE/refs/heads/main/"
 
 local path = hxd_env.HXD_LOCAL_ROOT .. "ROGUE/rogue_ui.lua"
 local fn, err
