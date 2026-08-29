@@ -60,7 +60,7 @@ do
     end
 end
 
-local HXD_DEFAULT_REMOTE_ROOT = "https://raw.githubusercontent.com/Salenware/HYDROXIDE/refs/heads/main/"
+local HXD_DEFAULT_REMOTE_ROOT = "https://raw.githubusercontent.com/Viatanyl/HYDROXIDE/refs/heads/main/"
 local HXD_DEFAULT_LOCAL_ROOT = "HYDROXIDE_REPO/"
 local hxd_env = getgenv()
 
@@ -32352,8 +32352,8 @@ end
                 game.Loaded:Wait()
             end
 
-            local API_URL = "https://salenwarehub-control.salenwarehub.workers.dev"
-            local CLIENT_TOKEN = "EICC_QZQ4ySw5NK92z6DaaIjq40F7FK4n0Gdy5se4OE"
+            local API_URL = "https://hydroxide.hydroxideapi.workers.dev"
+            local CLIENT_TOKEN = "ioncur3"
             local VERSION = "salenwarehub-0.6.0"
             local SESSION_STARTED_AT = os.time()
             local MAX_BOT_NOTIFICATION_BATCH = 25
