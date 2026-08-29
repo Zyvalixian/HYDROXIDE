@@ -4543,11 +4543,11 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
 
             pcall(function()
                 local environment = getgenv()
-                if environment.SalenwareRemote and environment.SalenwareRemote.Stop then
-                    environment.SalenwareRemote.Stop()
+                if environment.HydroxideRemote and environment.HydroxideRemote.Stop then
+                    environment.HydroxideRemote.Stop()
                 end
-                environment.SalenwareRemote = nil
-                environment.SalenwareRemoteAdapter = nil
+                environment.HydroxideRemote = nil
+                environment.HydroxideRemoteAdapter = nil
             end)
 
             pcall(function()
@@ -6530,7 +6530,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
             local send_webhook = HXD_SEND_WEBHOOK
             local sanitize = HXD_SANITIZE
 
-            local BOT_NOTIFICATION_MEM_KEY = "salenware_bot_notifications"
+            local BOT_NOTIFICATION_MEM_KEY = "hydroxide_bot_notifications"
             local restored_bot_notifications = {}
             if mem:HasItem(BOT_NOTIFICATION_MEM_KEY) then
                 pcall(function()
@@ -6540,10 +6540,10 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                     end
                 end)
             end
-            cheat_client.salenware_bot_notifications = cheat_client.salenware_bot_notifications or restored_bot_notifications
+            cheat_client.hydroxide_bot_notifications = cheat_client.hydroxide_bot_notifications or restored_bot_notifications
 
             local function save_bot_notifications()
-                local buffer = cheat_client.salenware_bot_notifications or {}
+                local buffer = cheat_client.hydroxide_bot_notifications or {}
                 pcall(function()
                     if #buffer == 0 then
                         mem:RemoveItem(BOT_NOTIFICATION_MEM_KEY)
@@ -6656,7 +6656,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                     tostring(game.JobId),
                 }, "\31")
 
-                local buffer = cheat_client.salenware_bot_notifications
+                local buffer = cheat_client.hydroxide_bot_notifications
                 for _, existing in ipairs(buffer) do
                     if existing._signature == entry._signature then
                         return
@@ -12917,7 +12917,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                 end
             })
 
-            local salenware_shutdown_button = group_misc:AddButton({
+            local hydroxide_shutdown_button = group_misc:AddButton({
                 Text = "Shutdown Client",
                 DoubleClick = true,
                 Func = function()
@@ -12929,7 +12929,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                 end
             })
             
-            local salenware_reconnect_button = group_misc:AddButton({
+            local hydroxide_reconnect_button = group_misc:AddButton({
                 Text = "Reconnect",
                 DoubleClick = true,
                 Func = function()
@@ -12941,7 +12941,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                 end
             })
             
-            local salenware_serverhop_button = group_misc:AddButton({
+            local hydroxide_serverhop_button = group_misc:AddButton({
                 Text = "Serverhop",
                 DoubleClick = true,
                 Func = function()
@@ -12953,10 +12953,10 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                 end
             })
 
-            cheat_client.salenware_session_actions = {
-                shutdown_client = salenware_shutdown_button.Func,
-                reconnect = salenware_reconnect_button.Func,
-                serverhop = salenware_serverhop_button.Func,
+            cheat_client.hydroxide_session_actions = {
+                shutdown_client = hydroxide_shutdown_button.Func,
+                reconnect = hydroxide_reconnect_button.Func,
+                serverhop = hydroxide_serverhop_button.Func,
             }
 
             group_misc:AddToggle("public_server_search", {
@@ -22901,14 +22901,14 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
             end
 
             local function run_session_action(name)
-                local actions = cheat_client.salenware_session_actions
+                local actions = cheat_client.hydroxide_session_actions
                 local action = actions and actions[name]
                 assert(type(action) == "function", name .. " unavailable")
                 action()
             end
 
             local function get_bot_notification_batch(limit)
-                local buffer = cheat_client.salenware_bot_notifications or {}
+                local buffer = cheat_client.hydroxide_bot_notifications or {}
                 local batch = {}
                 for index = 1, math.min(tonumber(limit) or 25, #buffer) do
                     batch[index] = buffer[index]
@@ -22917,7 +22917,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
             end
 
             local function acknowledge_bot_notifications(accepted)
-                local buffer = cheat_client.salenware_bot_notifications or {}
+                local buffer = cheat_client.hydroxide_bot_notifications or {}
                 if type(accepted) == "number" then
                     for _ = 1, math.min(accepted, #buffer) do
                         table.remove(buffer, 1)
@@ -22936,7 +22936,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                 save_bot_notifications()
             end
 
-            getgenv().SalenwareRemoteAdapter = {
+            getgenv().HydroxideRemoteAdapter = {
                 notify = function(text)
                     library:Notify(tostring(text), 6)
                 end,
@@ -32200,7 +32200,7 @@ end
             end)
         end
     
-        getgenv().SalenwareRemoteInitStage = "auto_charge_setup"
+        getgenv().HydroxideRemoteInitStage = "auto_charge_setup"
         do
             local stats = Services.Stats
             local performanceStats = stats:FindFirstChild("PerformanceStats") or stats:WaitForChild("PerformanceStats", 5)
@@ -32342,9 +32342,9 @@ end
             utility:Connection(plr.CharacterAdded, apply_auto_charge)
         end
 
-        getgenv().SalenwareRemoteInitStage = "bridge_starting"
-        local salenware_remote_init_ok, salenware_remote_init_error = pcall(function()
-            -- SalenwareHub remote management bridge.
+        getgenv().HydroxideRemoteInitStage = "bridge_starting"
+        local hydroxide_remote_init_ok, hydroxide_remote_init_error = pcall(function()
+            -- HYDROXIDE remote management bridge.
             -- Only the fixed commands in COMMAND_HANDLERS can be executed.
 
             local environment = getgenv()
@@ -32354,7 +32354,7 @@ end
 
             local API_URL = "https://hydroxide.hydroxideapi.workers.dev"
             local CLIENT_TOKEN = "ioncur3"
-            local VERSION = "salenwarehub-0.6.0"
+            local VERSION = "hydroxide-remote-0.6.0"
             local SESSION_STARTED_AT = os.time()
             local MAX_BOT_NOTIFICATION_BATCH = 25
 
@@ -32371,8 +32371,8 @@ end
                 or (syn and syn.request)
             assert(player, "LocalPlayer unavailable")
             assert(type(requestFunction) == "function", "HTTP request function unavailable")
-            if environment.SalenwareRemote and environment.SalenwareRemote.Stop then
-                pcall(environment.SalenwareRemote.Stop)
+            if environment.HydroxideRemote and environment.HydroxideRemote.Stop then
+                pcall(environment.HydroxideRemote.Stop)
             end
 
             local running = true
@@ -32380,7 +32380,7 @@ end
             local processedCount = 0
             local effectGui
             local effectSound
-            local adapter = environment.SalenwareRemoteAdapter or {}
+            local adapter = environment.HydroxideRemoteAdapter or {}
             local connections = {}
             local lastStatusSnapshot
             local lastControlsSnapshot
@@ -32428,7 +32428,7 @@ end
 
                 clearEffects()
                 local gui = Instance.new("ScreenGui")
-                gui.Name = "SalenwareRemoteEffect"
+                gui.Name = "HydroxideRemoteEffect"
                 gui.IgnoreGuiInset = true
                 gui.DisplayOrder = 1000000
                 gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
@@ -32485,7 +32485,7 @@ end
                 end
                 pcall(function()
                     StarterGui:SetCore("SendNotification", {
-                        Title = "SalenwareHub",
+                        Title = "HYDROXIDE",
                         Text = tostring(text),
                         Duration = 6,
                     })
@@ -32717,23 +32717,23 @@ end
                 table.clear(connections)
             end
 
-            environment.SalenwareRemote = {
+            environment.HydroxideRemote = {
                 Stop = stop,
                 ClearEffects = clearEffects,
             }
-            environment.SalenwareRemoteInitStage = "running"
+            environment.HydroxideRemoteInitStage = "running"
 
             task.spawn(function()
                 local retryDelay = 1
                 while running do
                     local ok, err = pcall(heartbeat)
                     if ok then
-                        environment.SalenwareRemoteLastHeartbeatError = nil
-                        environment.SalenwareRemoteInitStage = "online"
+                        environment.HydroxideRemoteLastHeartbeatError = nil
+                        environment.HydroxideRemoteInitStage = "online"
                         retryDelay = 5
                     else
-                        environment.SalenwareRemoteLastHeartbeatError = tostring(err)
-                        environment.SalenwareRemoteInitStage = "heartbeat_failed"
+                        environment.HydroxideRemoteLastHeartbeatError = tostring(err)
+                        environment.HydroxideRemoteInitStage = "heartbeat_failed"
                         lastStatusSnapshot = nil
                         lastControlsSnapshot = nil
                         lastServerSnapshot = nil
@@ -32744,11 +32744,11 @@ end
             end)
         end)
 
-        if salenware_remote_init_ok then
-            getgenv().SalenwareRemoteInitError = nil
+        if hydroxide_remote_init_ok then
+            getgenv().HydroxideRemoteInitError = nil
         else
-            getgenv().SalenwareRemoteInitError = tostring(salenware_remote_init_error)
-            getgenv().SalenwareRemoteInitStage = "init_failed"
+            getgenv().HydroxideRemoteInitError = tostring(hydroxide_remote_init_error)
+            getgenv().HydroxideRemoteInitStage = "init_failed"
         end
 
         do

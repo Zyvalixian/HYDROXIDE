@@ -87,7 +87,7 @@ def main():
     headers = {
         "Accept": "application/json",
         "Authorization": f"Bearer {token}",
-        "User-Agent": "Salenware-HYDROXIDE-Moderator-Sync/1.0",
+        "User-Agent": "HYDROXIDE-Moderator-Sync/1.0",
     }
     if old_etag:
         headers["If-None-Match"] = old_etag
