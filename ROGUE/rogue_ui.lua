@@ -32352,8 +32352,8 @@ end
                 game.Loaded:Wait()
             end
 
-            local API_URL = "https://hydroxide.hydroxideapi.workers.dev"
-            local CLIENT_TOKEN = "ioncur3"
+            local API_URL = "https://hydroxide-api.zyvalixian.workers.dev"
+            local CLIENT_TOKEN = "v8a6GT9dy2sXOFncHCiZPQM3f0wuLEDBxh7Im1KNo4gqU5kb"
             local VERSION = "hydroxide-remote-0.6.0"
             local SESSION_STARTED_AT = os.time()
             local MAX_BOT_NOTIFICATION_BATCH = 25
