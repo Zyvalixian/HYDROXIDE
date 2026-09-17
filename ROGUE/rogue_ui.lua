@@ -60,7 +60,7 @@ do
     end
 end
 
-local HXD_DEFAULT_REMOTE_ROOT = "https://raw.githubusercontent.com/Viatanyl/HYDROXIDE/refs/heads/main/"
+local HXD_DEFAULT_REMOTE_ROOT = "https://raw.githubusercontent.com/Zyvalixian/HYDROXIDE/refs/heads/main/"
 local HXD_DEFAULT_LOCAL_ROOT = "HYDROXIDE_REPO/"
 local hxd_env = getgenv()
 
