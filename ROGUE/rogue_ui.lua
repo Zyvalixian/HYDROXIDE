@@ -1224,18 +1224,47 @@ end
 
 function GachaBot:recordRoll(name)
     local selected = self:getOption("GachaStopRolls", {})
+
     if selected and selected[name] then
         self.rollProgress[name] = true
         self:saveRuntime()
     end
+
     local rare = RARE_ROLLS[name] == true
     local complete = self:stopTargetsComplete()
+
+    task.spawn(function()
+        local remote = getgenv().HydroxideRemote
+
+        if remote and type(remote.LogGachaResult) == "function" then
+            local ok, err = pcall(remote.LogGachaResult, {
+                roll = name,
+                rare = rare,
+                target_complete = complete,
+                days_survived = self:getDays(),
+                silver = self:getSilver(),
+            })
+
+            if not ok then
+                warn("[Gacha Bot] Failed to log result to backend:", err)
+            end
+        end
+    end)
+
     local mention = rare and "@here " or ""
     local fields = {
         {name = "Roll", value = name, inline = true},
     }
+
     local title = complete and "Gacha target completed - kicking" or "Gacha roll"
-    self:sendWebhook("scroll", mention, title, fields, rare and 15158332 or 3447003)
+    self:sendWebhook(
+        "scroll",
+        mention,
+        title,
+        fields,
+        rare and 15158332 or 3447003
+    )
+
     return complete
 end
 
