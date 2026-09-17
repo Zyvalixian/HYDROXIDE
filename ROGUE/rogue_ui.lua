@@ -32718,9 +32718,25 @@ end
             end
 
             environment.HydroxideRemote = {
-                Stop = stop,
-                ClearEffects = clearEffects,
-            }
+			    Stop = stop,
+			    ClearEffects = clearEffects,
+			
+			    LogGachaResult = function(data)
+			        assert(type(data) == "table", "gacha result must be a table")
+			
+			        return post("/api/client/gacha-results", {
+			            user_id = player.UserId,
+			            roll = data.roll,
+			            rare = data.rare == true,
+			            target_complete = data.target_complete == true,
+			            place_id = game.PlaceId,
+			            job_id = game.JobId,
+			            days_survived = data.days_survived,
+			            silver = data.silver,
+			        })
+			    end,
+			}
+
             environment.HydroxideRemoteInitStage = "running"
 
             task.spawn(function()
